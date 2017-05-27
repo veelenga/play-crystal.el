@@ -3,6 +3,7 @@
 
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
+[![Build Status](https://travis-ci.org/veelenga/play-crystal.el.svg?branch=master)](https://travis-ci.org/veelenga/play-crystal.el)
 
 ### Features:
 
