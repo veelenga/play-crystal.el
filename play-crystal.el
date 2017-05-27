@@ -26,18 +26,16 @@
 
 ;;; Commentary:
 ;;
-;; https://play.crystal-lang.org integration.
-;;
 ;; ### Features:
 ;;
-;; * [x] Allows to paste code into Emacs buffers
-;; * [ ] Allows to submit code to [play.crystal-lang.org](https://play.crystal-lang.org)
+;; * [x] Allows to fetch code into Emacs buffers from play.crystal-lang.org
+;; * [ ] Allows to submit code to play.crystal-lang.org directly from Emacs
 ;;
 ;; ### Usage
 ;;
-;; Run one of the predefined interactive functions to fetch or submit
-;; code from [play.crystal-lang.org](https://play.crystal-lang.org).
+;; Run one of the predefined interactive functions.
 ;;
+;; See [Function Documentation](#function-documentation) for details.
 
 ;;; Code:
 
@@ -46,7 +44,6 @@
 
 (require 'json)
 (require 'request)
-(require 'subr-x)
 
 (defgroup play-crystal nil
   "https://play.crystal-lang.org/ integration."
@@ -106,7 +103,7 @@
       (erase-buffer)
       (and (stringp data) (insert data))
       (let ((raw-header (request-response--raw-header response)))
-        (unless (or (null raw-header) (string-empty-p raw-header))
+        (unless (or (null raw-header) (s-blank-str? raw-header))
           (insert "\n" raw-header))))))
 
 (cl-defun play-crystal--chunk (data)
@@ -121,7 +118,7 @@
          (id (assoc-default 'id run)))
     (when (not (s-blank-str? code))
       (concat
-       (format "\n# Html url: %s" html-url)
+       (format "\n# URL: %s" html-url)
        (format "\n# Created at: %s" created-at)
        (format "\n# Language: %s" language)
        (format "\n# Version: %s" version)
@@ -139,16 +136,16 @@
 
 (defun play-crystal-insert (run-id)
   "Insert code defined by RUN-ID into the current buffer."
-  (interactive (play-crystal-read-run-id))
+  (interactive (play-crystal--read-run-id))
   (play-crystal--request
    (play-crystal--run-path run-id)
    :success (cl-function
              (lambda (&key data &allow-other-keys)
-               (insert (play-crystal-chunk data))))))
+               (insert (play-crystal--chunk data))))))
 
 (defun play-crystal-insert-another-buffer (run-id)
   "Insert code defined by RUN-ID into another buffer."
-  (interactive (play-crystal-read-run-id))
+  (interactive (play-crystal--read-run-id))
   (play-crystal--request
    (play-crystal--run-path run-id)
    :success (cl-function
@@ -157,7 +154,7 @@
                  (switch-to-buffer play-crystal-buffer-name)
                  (erase-buffer)
                  (when (fboundp 'crystal-mode) (crystal-mode))
-                 (insert (play-crystal-chunk data)))))))
+                 (insert (play-crystal--chunk data)))))))
 
 (provide 'play-crystal)
 ;;; play-crystal.el ends here
