@@ -135,7 +135,7 @@
   (format "%s/%s" play-crystal-runs-path run-id))
 
 (defun play-crystal-insert (run-id)
-  "Insert code defined by RUN-ID into the current buffer."
+  "Insert code identified by RUN-ID into the current buffer."
   (interactive (play-crystal--read-run-id))
   (play-crystal--request
    (play-crystal--run-path run-id)
@@ -144,7 +144,7 @@
                (insert (play-crystal--chunk data))))))
 
 (defun play-crystal-insert-another-buffer (run-id)
-  "Insert code defined by RUN-ID into another buffer."
+  "Insert code identified by RUN-ID into another buffer."
   (interactive (play-crystal--read-run-id))
   (play-crystal--request
    (play-crystal--run-path run-id)
@@ -155,6 +155,18 @@
                  (erase-buffer)
                  (when (fboundp 'crystal-mode) (crystal-mode))
                  (insert (play-crystal--chunk data)))))))
+
+(defun play-crystal-browse (run-id)
+  "Show code identified by RUN-ID in a browser using 'browse-url'."
+  (interactive (play-crystal--read-run-id))
+  (play-crystal--request
+   (play-crystal--run-path run-id)
+   :success (cl-function
+             (lambda (&key data &allow-other-keys)
+               (browse-url
+                (concat
+                 play-crystal-baseurl
+                 (format "/#/r/%s" (assoc-default 'id (assoc-default 'run data)))))))))
 
 (provide 'play-crystal)
 ;;; play-crystal.el ends here

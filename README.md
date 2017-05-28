@@ -21,11 +21,15 @@ See [Function Documentation](#function-documentation) for details.
 
 #### `(play-crystal-insert RUN-ID)`
 
-Insert code defined by RUN-ID into the current buffer.
+Insert code identified by RUN-ID into the current buffer.
 
 #### `(play-crystal-insert-another-buffer RUN-ID)`
 
-Insert code defined by RUN-ID into another buffer.
+Insert code identified by RUN-ID into another buffer.
+
+#### `(play-crystal-browse RUN-ID)`
+
+Show code identified by RUN-ID in a browser using ’browse-url’.
 
 -----
 <div style="padding-top:15px;color: #d0d0d0;">
