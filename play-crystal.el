@@ -53,6 +53,7 @@
 (defconst play-crystal-version "0.1.0")
 (defconst play-crystal-baseurl "https://play.crystal-lang.org")
 (defconst play-crystal-runs-path "/runs")
+(defconst play-crystal-runrequests-path "/run_requests")
 
 (defvar play-crystal-buffer-name "*Play-Crystal*"
   "Buffer name for code insertions.")
@@ -62,7 +63,12 @@
 
 (defconst play-crystal-default-headers
   '(("Accept" . "application/json")
+    ("Content-Type" . "application/json; charset=UTF-8")
     ("User-Agent" . ,(format "play-crystal.el/%s" play-crystal-version))))
+
+(cl-defun play-crystal--run-url (run)
+  "An html url to the run identified by RUN-ID."
+  (format "%s/#/r/%s" play-crystal-baseurl (play-crystal-run-id run)))
 
 (cl-defun play-crystal--request
     (endpoint
@@ -106,32 +112,41 @@
         (unless (or (null raw-header) (s-blank-str? raw-header))
           (insert "\n" raw-header))))))
 
+(cl-defstruct (play-crystal-run (:constructor play-crystal-run-new))
+  "A structure holding the information about the run."
+  id language version code exit-code created-at url html-url)
+
+(cl-defun play-crystal--run (data)
+  "Create a 'play-crystal-run' struct from api repsonse DATA."
+  (let-alist (assoc-default 'run data)
+    (play-crystal-run-new
+     :id .id
+     :language .language
+     :version .version
+     :code .code
+     :exit-code .exit_code
+     :created-at .created_at
+     :url .url
+     :html-url .html_url)))
+
 (cl-defun play-crystal--chunk (data)
   "Pre-formatted play crystal code chunk."
-  (let* ((run (assoc-default 'run data))
-         (html-url (assoc-default 'html_url run))
-         (created-at (assoc-default 'created_at run))
-         (language (assoc-default 'language run))
-         (version (assoc-default 'version run))
-         (exit-code (assoc-default 'exit_code run))
-         (code (assoc-default 'code run))
-         (id (assoc-default 'id run)))
-    (when (not (s-blank-str? code))
-      (concat
-       (format "\n# URL: %s" html-url)
-       (format "\n# Created at: %s" created-at)
-       (format "\n# Language: %s" language)
-       (format "\n# Version: %s" version)
-       (format "\n# Exit code: %d" exit-code)
-       (format "\n%s" code)
-       (format "\n# End of chunk #%s" id)))))
+  (let ((run (play-crystal--run data)))
+    (concat
+     (format "\n# URL: %s" (play-crystal--run-url run))
+     (format "\n# Created at: %s" (play-crystal-run-created-at run))
+     (format "\n# Language: %s" (play-crystal-run-language run))
+     (format "\n# Version: %s" (play-crystal-run-version run))
+     (format "\n# Exit code: %d" (play-crystal-run-exit-code run))
+     (format "\n%s" (play-crystal-run-code run))
+     (format "\n# End of run #%s" (play-crystal-run-id run)))))
 
 (cl-defun play-crystal--read-run-id ()
   "Read run id."
   (list (read-string "Enter run id: ")))
 
 (cl-defun play-crystal--run-path (run-id)
-  "Returns a path to the run."
+  "Return a path to the run."
   (format "%s/%s" play-crystal-runs-path run-id))
 
 (defun play-crystal-insert (run-id)
@@ -164,9 +179,25 @@
    :success (cl-function
              (lambda (&key data &allow-other-keys)
                (browse-url
-                (concat
-                 play-crystal-baseurl
-                 (format "/#/r/%s" (assoc-default 'id (assoc-default 'run data)))))))))
+                (play-crystal--run-url (play-crystal--run data)))))))
+
+(cl-defun play-crystal--create-hook (data)
+  "After create hook."
+  (when (y-or-n-p "Successfully created. Open in browser? ")
+    (let* ((run (play-crystal--run data))
+           (url (play-crystal--run-url run)))
+      (browse-url url))))
+
+(cl-defun play-crystal--create (code)
+  "Create new run submitting crystal code."
+  (play-crystal--request
+   play-crystal-runrequests-path
+   :type "POST"
+   :data (json-encode `(("run_request" .(("language" . "crystal")
+                                         ("code" . ,code)))))
+   :success (cl-function
+             (lambda (&key data &allow-other-keys)
+               (play-crystal--create-hook (assoc-default 'run_request data))))))
 
 (provide 'play-crystal)
 ;;; play-crystal.el ends here
