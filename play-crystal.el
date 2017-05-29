@@ -26,10 +26,16 @@
 
 ;;; Commentary:
 ;;
+;; [play.crystal-lang.org](https://play.crystal-lang.org/) is a web resource to
+;; submit/run/share [Crystal](https://crystal-lang.org/) code.
+;;
+;; This package allows you to use this resource without exiting your favorite Emacs.
+;; 
 ;; ### Features:
 ;;
-;; * [x] Allows to fetch code into Emacs buffers from play.crystal-lang.org
-;; * [ ] Allows to submit code to play.crystal-lang.org directly from Emacs
+;; * Allows to fetch code into Emacs buffers from play.crystal-lang.org
+;; * Allows to submit code to play.crystal-lang.org directly from Emacs
+;; * Allows to browse play.crystal-lang.org
 ;;
 ;; ### Usage
 ;;
@@ -183,7 +189,7 @@
 
 (cl-defun play-crystal--create-hook (data)
   "After create hook."
-  (when (y-or-n-p "Successfully created. Open in browser? ")
+  (when (y-or-n-p "Code successfully submitted. Open in browser? ")
     (let* ((run (play-crystal--run data))
            (url (play-crystal--run-url run)))
       (browse-url url))))
@@ -198,6 +204,24 @@
    :success (cl-function
              (lambda (&key data &allow-other-keys)
                (play-crystal--create-hook (assoc-default 'run_request data))))))
+
+(cl-defun play-crystal--region (&key
+                                (beg (and (use-region-p) (region-beginning)))
+                                (end (and (use-region-p) (region-end))))
+  "Return code in current region."
+  (buffer-substring-no-properties beg end))
+
+(defun play-crystal-submit-region ()
+  "Create new run submitting code from the current region."
+  (interactive)
+  (play-crystal--create (play-crystal--region)))
+
+(defun play-crystal-submit-buffer ()
+  "Create new run submitting code from the current buffer."
+  (interactive)
+  (play-crystal--create (play-crystal--region :beg (point-min) :end (point-max))))
+
+(print (play-crystal--region :beg (point-min) :end (point-max)))
 
 (provide 'play-crystal)
 ;;; play-crystal.el ends here
