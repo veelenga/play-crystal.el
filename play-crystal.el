@@ -187,12 +187,18 @@
                (browse-url
                 (play-crystal--run-url (play-crystal--run data)))))))
 
+(defun play-crystal--kill-new-message (url)
+  "Make URL the latest kill and print a message."
+  (kill-new url)
+  (message "%s" url))
+
 (cl-defun play-crystal--create-hook (data)
   "After create hook."
-  (when (y-or-n-p "Code successfully submitted. Open in browser? ")
-    (let* ((run (play-crystal--run data))
-           (url (play-crystal--run-url run)))
-      (browse-url url))))
+  (let* ((run (play-crystal--run data))
+         (url (play-crystal--run-url run)))
+    (if (y-or-n-p "Code successfully submitted. Open in browser? ")
+        (browse-url url)
+      (play-crystal--kill-new-message url))))
 
 (cl-defun play-crystal--create (code)
   "Create new run submitting crystal code."
