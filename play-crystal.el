@@ -4,7 +4,7 @@
 ;; Author: Vitalii Elenhaupt
 ;; URL: https://github.com/veelenga/play-crystal.el
 ;; Keywords: convenience
-;; Version: 0.1.0
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "24.4") (dash "2.12.0") (request "0.2.0"))
 
 ;; This file is not part of GNU Emacs.
