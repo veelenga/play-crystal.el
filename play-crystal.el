@@ -1,6 +1,6 @@
 ;;; play-crystal.el --- https://play.crystal-lang.org integration.
 
-;; Copyright © 2017 Vitalii Elenhaupt <velenhaupt@gmail.com>
+;; Copyright © 2018 Vitalii Elenhaupt <velenhaupt@gmail.com>
 ;; Author: Vitalii Elenhaupt
 ;; URL: https://github.com/veelenga/play-crystal.el
 ;; Keywords: convenience
@@ -25,28 +25,37 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;
-;; [play.crystal-lang.org](https://play.crystal-lang.org/) is a web resource to
-;; submit/run/share [Crystal](https://crystal-lang.org/) code.
-;;
+
+;; https://play.crystal-lang.org/ is a web resource to submit/run/share Crystal code.
 ;; This package allows you to use this resource without exiting your favorite Emacs.
-;; 
-;; ### Features:
-;;
-;; * Allows to fetch code into Emacs buffers from play.crystal-lang.org
-;; * Allows to submit code to play.crystal-lang.org directly from Emacs
-;; * Allows to browse play.crystal-lang.org
-;;
-;; ### Usage
-;;
+
+;; Usage:
+
 ;; Run one of the predefined interactive functions.
 ;;
-;; See [Function Documentation](#function-documentation) for details.
+;; Insert code identified by RUN-ID into the current buffer:
+;;
+;;    (play-crystal-insert RUN-ID)
+;;
+;; Insert code identified by RUN-ID into another buffer:
+;;
+;;    (play-crystal-insert-another-buffer RUN-ID)
+;;
+;; Show code identified by RUN-ID in a browser using ’browse-url’:
+;;
+;;    (play-crystal-browse RUN-ID)
+;;
+;; Create new run submitting code from the current region:
+;;
+;;    (play-crystal-submit-region)
+;;
+;; Create new run submitting code from the current buffer:
+;;
+;;    (play-crystal-submit-buffer)
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 (require 'json)
 (require 'request)
@@ -155,6 +164,7 @@
   "Return a path to the run."
   (format "%s/%s" play-crystal-runs-path run-id))
 
+;;;###autoload
 (defun play-crystal-insert (run-id)
   "Insert code identified by RUN-ID into the current buffer."
   (interactive (play-crystal--read-run-id))
@@ -164,6 +174,7 @@
              (lambda (&key data &allow-other-keys)
                (insert (play-crystal--chunk data))))))
 
+;;;###autoload
 (defun play-crystal-insert-another-buffer (run-id)
   "Insert code identified by RUN-ID into another buffer."
   (interactive (play-crystal--read-run-id))
@@ -177,6 +188,7 @@
                  (when (fboundp 'crystal-mode) (crystal-mode))
                  (insert (play-crystal--chunk data)))))))
 
+;;;###autoload
 (defun play-crystal-browse (run-id)
   "Show code identified by RUN-ID in a browser using 'browse-url'."
   (interactive (play-crystal--read-run-id))
@@ -217,11 +229,13 @@
   "Return code in current region."
   (buffer-substring-no-properties beg end))
 
+;;;###autoload
 (defun play-crystal-submit-region ()
   "Create new run submitting code from the current region."
   (interactive)
   (play-crystal--create (play-crystal--region)))
 
+;;;###autoload
 (defun play-crystal-submit-buffer ()
   "Create new run submitting code from the current buffer."
   (interactive)
