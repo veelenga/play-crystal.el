@@ -4,7 +4,6 @@
 ;; Author: Vitalii Elenhaupt
 ;; URL: https://github.com/veelenga/play-crystal.el
 ;; Keywords: convenience
-;; Version: 0.1.1
 ;; Package-Requires: ((emacs "24.4") (dash "2.12.0") (request "0.2.0"))
 
 ;; This file is not part of GNU Emacs.
@@ -65,7 +64,7 @@
   :prefix "play-crystal-"
   :group 'applications)
 
-(defconst play-crystal-version "0.1.0")
+(defconst play-crystal-version "0.1.2")
 (defconst play-crystal-baseurl "https://play.crystal-lang.org")
 (defconst play-crystal-runs-path "/runs")
 (defconst play-crystal-runrequests-path "/run_requests")
