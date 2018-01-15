@@ -4,6 +4,7 @@
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
 [![Build Status](https://travis-ci.org/veelenga/play-crystal.el.svg?branch=master)](https://travis-ci.org/veelenga/play-crystal.el)
+[![MELPA](https://melpa.org/packages/play-crystal-badge.svg)](https://melpa.org/#/play-crystal)
 
 [play.crystal-lang.org](https://play.crystal-lang.org/) is a web resource to
 submit/run/share [Crystal](https://crystal-lang.org/) code.
